@@ -17,45 +17,192 @@
 
 using namespace std;
 
-/*class Jugs {
-public:
-	Jugs(int a, int b, int c) :
-			distribution_(new int[3]), first_(a), second_(b), third_(c) {
-		set();
+bool Compare(vector<int> &curr, vector<int> &target) {
+	unsigned int i = 0;
+	for(i = 0; i < curr.size() && curr[i] == target[i]; i++) {
+		;
 	}
-	~Jugs() {
-		delete[] distribution_;
+	if(i == 3) {
+		return true;
 	}
-	inline int* distribution() const {
-		return distribution_;
-	}
-	inline int first() const {
-		return first_;
-	}
-	inline int second() const {
-		return second_;
-	}
-	inline int third() const {
-		return third_;
-	}
-private:
-	int * const distribution_;
-	int const first_, second_, third_;
+	return false;
+}
 
-	void set() {
-		distribution_[0] = first_;
-		distribution_[1] = second_;
-		distribution_[2] = third_;
+void BFS(vector<int> &curr,int capa, int capb, int capc,
+		vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
+	if(Compare(curr, target)) {
+		return;
 	}
-};
-*/
-void BFS(vector<int> &curr, vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
-	cout << curr[2] << endl;
+}
+
+void BFS_helper(vector<int> &curr, int capa, int capb, int capc,
+		vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
+	//this should really be a helper function, where the main function calls this to queue up more things and then looks at the next one
+	//available adds a specific case to the queue and is set to false so we can check if we can use that possibility or if we have
+	vector<int> next;
+	bool progress = false;
+	bool available = false;
+	if(curr[2] > 0 && curr[0] < capa) {
+		if(curr[2] > (capa - curr[0])) {
+			next.push_back(capa);
+			next.push_back(curr[1]);
+			next.push_back(curr[2]-(capa-curr[0]));
+			next.push_back(1);
+			next.push_back(capa - curr[0]);
+		} else {
+			next.push_back(curr[0] + curr[2]);
+			next.push_back(curr[1]);
+			next.push_back(0);
+			next.push_back(1);
+			next.push_back(curr[2]);
+		}
+		if(visited[next[0]][next[1]] == 0) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+		//if at any time next == target it should break all of these if statements
+	}
+
+	if(curr[1] > 0 && curr[0] < capa) {
+		if(curr[1] > (capa - curr[0])) {
+			next.push_back(capa);
+			next.push_back(curr[1]-(capa-curr[0]));
+			next.push_back(curr[2]);
+			next.push_back(2);
+			next.push_back(capa-curr[0]);
+		} else {
+			next.push_back(curr[0] + curr[1]);
+			next.push_back(0);
+			next.push_back(curr[2]);
+			next.push_back(2);
+			next.push_back(curr[1]);
+		}
+		if(visited[next[0]][next[1]] == 0) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+	}
+
+	if(curr[2] > 0 && curr[1] < capb) {
+		if(curr[2] > (capb - curr[1])) {
+			next.push_back(curr[0]);
+			next.push_back(capb);
+			next.push_back(curr[2] - (capb-curr[1]));
+			next.push_back(3);
+			next.push_back(capb-curr[1]);
+		} else {
+			next.push_back(curr[0]);
+			next.push_back(curr[1] + curr[2]);
+			next.push_back(0);
+			next.push_back(3);
+			next.push_back(curr[2]);
+		}
+		if(visited[next[0]][next[1]]) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+	}
+
+	if(curr[0] > 0 && curr[1] < capb) {
+		if(curr[0] > (capb - curr[1])) {
+			next.push_back(curr[0] - (capb - curr[1])));
+			next.push_back(capb);
+			next.push_back(curr[2]);
+			next.push_back(4);
+			next.push_back(capb - curr[1]);
+		} else {
+			next.push_back(0);
+			next.push_back(curr[0] + curr[1]);
+			next.push_back(curr[2]);
+			next.push_back(4);
+			next.push_back(curr[0]);
+		}
+		if(visited[next[0]][next[1]]) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+	}
+
+	if(curr[1] > 0 && curr[2] < capc) {
+		if(curr[1] > (capc - curr[2])) {
+			next.push_back(curr[0]);
+			next.push_back(curr[1] - (capc - curr[2]));
+			next.push_back(capc);
+			next.push_back(5);
+			next.push_back(capc - curr[2]);
+		} else {
+			next.push_back(curr[0]);
+			next.push_back(0);
+			next.push_back(curr[1] + curr[2]);
+			next.push_back(5);
+			next.push_back(curr[1]);
+		}
+		if(visited[next[0]][next[1]]) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+	}
+
+	if(curr[0] > 0 && curr[2] < capc) {
+		if(curr[0] > (capc - curr[2])) {
+			next.push_back(curr[0] - (capc - curr[2]));
+			next.push_back(curr[1]);
+			next.push_back(capc);
+			next.push_back(6);
+			next.push_back(capc-curr[2]);
+		} else {
+			next.push_back(0);
+			next.push_back(curr[1]);
+			next.push_back(curr[2] + curr[0]);
+			next.push_back(6);
+			next.push_back(curr[0]);
+		}
+		if(visited[next[0]][next[1]]) {
+			available = true;
+			visited[next[0]][next[1]] = 1;
+		}
+		if(available) {
+			progress = true;
+			search.push(next);
+			available = false;
+		}
+	}
+	//when broken early the result should be a vector with the queue in BFS, the only check is the last item since it is the target
+	//if found will break early, or not because it never found it.
+	return;
 	//base case curr == target
 	//check if curr is visited
 		//if yes end
 		//if no
 			//recursively call
+	/*
+	 * 1) Pour from C to A 2) Pour from B to A 3) Pour from C to B 4) Pour from A to B 5) Pour from B to C 6) Pour from A to C
+	 */
 }
 int main(int argc, char * const argv[]) {
 	//array[ array[bool] ] visited
@@ -66,12 +213,14 @@ int main(int argc, char * const argv[]) {
 	test.push_back(0);
 	test.push_back(0);
 	test.push_back(8);
+	test.push_back(0);
 	vector<int> target;
 	target.push_back(3);
 	target.push_back(5);
 	target.push_back(0);
 	vector< vector<int> > visited;
 	queue< vector<int> > search;
+	//queue< vector<int> > result;
 	BFS(test, target,visited, search);
 	return 0;
 }
