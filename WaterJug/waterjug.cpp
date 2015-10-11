@@ -17,6 +17,7 @@
 
 using namespace std;
 
+<<<<<<< HEAD
 bool Compare(vector<int> &curr, vector<int> &target) {
 	unsigned int i = 0;
 	for(i = 0; i < curr.size() && curr[i] == target[i]; i++) 
@@ -26,6 +27,19 @@ bool Compare(vector<int> &curr, vector<int> &target) {
 	if(i == 3) 
 	{
 		return true;
+=======
+/*class Jugs {
+public:
+	Jugs(int a, int b, int c) :
+			distribution_(new int[3]), first_(a), second_(b), third_(c) {
+		set();
+	}
+	~Jugs() {
+		delete[] distribution_;
+	}
+	inline int* distribution() const {
+		return distribution_;
+>>>>>>> parent of c50bf2d... Main function changed
 	}
 	return false;
 }
@@ -119,6 +133,7 @@ void BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 			available = false;
 		}
 	}
+<<<<<<< HEAD
 
 	if(curr[0] > 0 && curr[1] < capb) {
 		if(curr[0] > (capb - curr[1])) {
@@ -203,13 +218,13 @@ void BFS(vector<int> &curr, vector<int> &target, vector< vector<int> > &visited,
 	//when broken early the result should be a vector with the queue in BFS, the only check is the last item since it is the target
 	//if found will break early, or not because it never found it.
 	return;
+=======
+};
+*/
+void BFS(vector<int> &curr, vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
+	cout << curr[2] << endl;
+>>>>>>> parent of c50bf2d... Main function changed
 	//base case curr == target
-	if (!(visited[curr[0], curr[1]]))
-	{
-		visited[curr[0], curr[1]] = true;
-		
-	}
-		
 	//check if curr is visited
 		//if yes end
 		//if no
@@ -218,26 +233,12 @@ void BFS(vector<int> &curr, vector<int> &target, vector< vector<int> > &visited,
 	 * 1) Pour from C to A 2) Pour from B to A 3) Pour from C to B 4) Pour from A to B 5) Pour from B to C 6) Pour from A to C
 	 */
 }
-*/
-
-bool parseArg(vector<int> &jarSize, vector<int> &target)
-{
-	for (int i = 0; i < 3; ++i)
-	{
-		if (target[i] > jarSize[i])
-		{
-			cerr << "Goal cannot exceed capacity of jug" << endl;
-			return false;
-		}
-	}
-}
-
-int main(int argc, char * const argv[])
-{
+int main(int argc, char * const argv[]) {
 	//array[ array[bool] ] visited
 	/*Jugs *test = new Jugs(1, 3, 5);
 	cout << test->first() << endl;
 	*/
+<<<<<<< HEAD
 	if (argc != 7)
 	{
 		cerr << "Usage: ./waterjugpuzzle <cap A> <cap B> <cap C> <goal A> <goal B> <goal C>" << endl;
@@ -310,6 +311,8 @@ int main(int argc, char * const argv[])
 	//In parseArg, have two parameters that take vector<int>
 	parseArg(jarSizes, target);
 	/*
+=======
+>>>>>>> parent of c50bf2d... Main function changed
 	vector<int> test;
 	test.push_back(0);
 	test.push_back(0);
@@ -319,6 +322,7 @@ int main(int argc, char * const argv[])
 	target.push_back(3);
 	target.push_back(5);
 	target.push_back(0);
+<<<<<<< HEAD
 	vector< vector<bool> > visited;
 	
 	queue< vector<int> > search;
@@ -326,6 +330,11 @@ int main(int argc, char * const argv[])
 	//queue< vector<int> > result;
 	BFS(test, target,visited, search);
 	*/
+=======
+	vector< vector<int> > visited;
+	queue< vector<int> > search;
+	BFS(test, target,visited, search);
+>>>>>>> parent of c50bf2d... Main function changed
 	return 0;
 }
 
