@@ -92,7 +92,7 @@ vector< vector<int> > getAdjacents(vector<int> curr, vector<int> &sizes)
 	}
 	return ways;
 }
-
+/*
 //vector< vector<int> >
 void BFS_helper(
 		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
@@ -150,14 +150,70 @@ void BFS_helper(
 		}
 	}
 }
-/*
-vector< vector<int> > BFS(
-		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
-		vector< vector<bool> > &isVisited, queue< vector<int> > &searches)
-	{
-		
-	}
 */
+
+void BFS_helper(
+		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
+		vector< vector<bool> > &isVisited, queue< vector<int> > &searches,  
+		vector< vector<int> > &result)
+{
+	//If reach target
+	if (!(equal(curr.begin(), curr.begin() + 3, target.begin())))
+	{
+		if (!(isVisited[curr[0]][curr[1]]))
+		{
+			searches.push(curr);
+			isVisited[curr[0]][curr[1]] = true;
+			
+			vector< vector<int> > paths = getAdjacents(curr, jarSizes);
+
+			for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
+			{
+				if (!(isVisited[(*it)[0]][(*it)[1]]))
+				{
+					searches.push(*it);
+					BFS_helper((*it), jarSizes, target, isVisited, searches, result);
+					searches.pop();
+				}
+			}
+		}
+	}
+	else
+	{
+		while (searches.size() > 0)
+		{
+			result.push_back(searches.front());
+			searches.pop();
+		}
+	}
+}
+
+vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &target)
+{
+	vector< vector<int> > result;
+	queue< vector<int> > searches;
+	vector< vector<bool> > visitedJars(jarSizes[0] + 1, vector<bool>(jarSizes[1] + 1));;
+	if (!(visitedJars[curr[0]][curr[1]]))
+	{
+		searches.push(curr);
+		result.push_back(curr);
+		visitedJars[curr[0]][curr[1]] = true;
+		vector< vector<int> > paths = getAdjacents(curr, jarSizes);
+		
+		for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
+		{
+			if (!(visitedJars[(*it)[0]][(*it)[1]]))
+			{
+				searches.push(*it);
+				BFS_helper((*it), jarSizes, target, visitedJars, searches, result);
+				result.push_back(searches.front());
+				searches.pop();
+			}
+		}
+	}
+	return result;
+}
+
 //Print path
 void displayPath(vector< vector<int> > &way)
 {
@@ -166,40 +222,41 @@ void displayPath(vector< vector<int> > &way)
 		if (it == way.begin())
 		{
 			cout << "Initial state. (";
-			for (vector<int>::iterator vertex_it = (*it).begin(); vertex_it != (*it).end(); ++vertex_it)
+			for (int i = 0; i < 3; ++i)
 			{
-				if (vertex_it == (*it).begin())
+				if (i == 0)
 				{
-					cout << *vertex_it;
+					cout << (*it)[i];
 				}
 				else
 				{
-					cout << ", " << *vertex_it;
+					cout << ", " << (*it)[i];
 				}
 			}
 			cout << ")" << endl;
 		}
 		else
 		{
+			cout << "Pour " << (*it)[4] << " gallons from ";
 			switch ((*it)[3])
 			{
 				case (1):
-					cout << "Pour " << (*it)[4] << " gallons from C to A. (";
+					cout << "C to A. (";
 					break;
 				case (2):
-					cout << "Pour " << (*it)[4] << " gallons from B to A. (";
+					cout << "B to A. (";
 					break;
 				case (3):
-					cout << "Pour " << (*it)[4] << " gallons from C to B. (";
+					cout << "C to B. (";
 					break;
 				case (4):
-					cout << "Pour " << (*it)[4] << " gallons from A to B. (";
+					cout << "A to B. (";
 					break;
 				case (5):
-					cout << "Pour " << (*it)[4] << " gallons from B to C. (";
+					cout << "B to C. (";
 					break;
 				case (6):
-					cout << "Pour " << (*it)[4] << " gallons from A to C. (";
+					cout << "A to C. (";
 					break;
 			}
 			for (int i = 0; i < 3; ++i)
@@ -221,7 +278,7 @@ void displayPath(vector< vector<int> > &way)
 //Check case on user input into command line
 bool parseArg(vector<int> &jarSizes, vector<int> &target)
 {
-	int counter = 0;
+	int counter(0);
 	for (int i = 0; i < 3; ++i)
 	{
 		if (target[i] > jarSizes[i])
@@ -321,51 +378,61 @@ int main(int argc, char * const argv[])
 		iss.clear();
 	}
 	//In parseArg, have two parameters that take vector<int>
-	if (parseArg(jarSizes, target))
+	if (!(parseArg(jarSizes, target)))
 	{
-		vector< vector<bool> > visited(jarSizes[0] + 1, vector<bool>(jarSizes[1] + 1));
-		/*
-		for (vector< vector<bool> >::const_iterator it = visited.begin(); it != visited.end(); ++it)
-		{
-			for (vector<bool>::const_iterator its = (*it).begin(); its != (*it).end(); ++its)
-			{
-				cout << (*its) << " ";
-			}
-			cout << endl;
-		}
-		*/
-		/*
-		Display Test
-		curr[2] = jarSizes[2];
-		queue< vector<int> > searches;
-		searches.push(curr);
-		BFS_helper(curr, jarSizes, target, visited, searches);
-		vector< vector<int> > paths;
-		vector<int> way;
-		way.push_back(0);
-		way.push_back(0);
-		way.push_back(8);
-		paths.push_back(way);
-		way.clear();
-		way.push_back(1);
-		way.push_back(0);
-		way.push_back(2);
-		way.push_back(1);
-		way.push_back(1);
-		paths.push_back(way);
-		cout << endl;
-		displayPath(paths);
-		*/
-		
-		/*
-		vector< vector<int> > path = BFS(curr, jarSizes, target, visited, searches);
-		if (path.size <= 0)
-		{
-			cout << "No solution." << endl;
-			return 1;
-		}
-		displayPath(path);
-		*/
+		return 1;
 	}
+	curr[2] = jarSizes[2];
+	vector< vector<int> > paths = BFS(curr, jarSizes, target);
+	if (paths.size() <= 1)
+	{
+		cout << "No solution." << endl;
+	}
+	else
+	{
+		displayPath(paths);
+	}
+	/*
+	for (vector< vector<bool> >::const_iterator it = visited.begin(); it != visited.end(); ++it)
+	{
+		for (vector<bool>::const_iterator its = (*it).begin(); its != (*it).end(); ++its)
+		{
+			cout << (*its) << " ";
+		}
+		cout << endl;
+	}
+	*/
+	/*
+	Display Test
+	curr[2] = jarSizes[2];
+	queue< vector<int> > searches;
+	searches.push(curr);
+	BFS_helper(curr, jarSizes, target, visited, searches);
+	vector< vector<int> > paths;
+	vector<int> way;
+	way.push_back(0);
+	way.push_back(0);
+	way.push_back(8);
+	paths.push_back(way);
+	way.clear();
+	way.push_back(1);
+	way.push_back(0);
+	way.push_back(2);
+	way.push_back(1);
+	way.push_back(1);
+	paths.push_back(way);
+	cout << endl;
+	displayPath(paths);
+	*/
+	
+	/*
+	vector< vector<int> > path = BFS(curr, jarSizes, target, visited, searches);
+	if (path.size <= 0)
+	{
+		cout << "No solution." << endl;
+		return 1;
+	}
+	displayPath(path);
+	*/
 	return 0;
 }
