@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Name        : waterjug.cpp
+ * Name        : waterjugpuzzle.cpp
  * Author      : Justin Tsang
  * Date        : October 8, 2015
  * Description : List the most efficient path to reach target jug amounts
@@ -21,9 +21,9 @@ using namespace std;
  * BFS
  * visit each adjacent
  * return vec of vec
- * Display
  */
 
+//Perform the pouring of water from one jug to other
 vector<int> pourJugs(vector<int> curr, vector<int> &sizes, int from, int to, int order)
 {
 	/*
@@ -42,11 +42,13 @@ vector<int> pourJugs(vector<int> curr, vector<int> &sizes, int from, int to, int
 	if ((curr[to] + curr[from]) <= sizes[to])
 	{
 		curr[to] = curr[to] + curr[from];
+		curr[4] = curr[from];
 		curr[from] = 0;
 	}
 	else
 	{
 		curr[from] = curr[from] - sizes[to] - curr[to];
+		curr[4] = sizes[to] - curr[to];
 		curr[to] = sizes[to];
 	}
 	curr[3] = order;
@@ -60,6 +62,7 @@ vector<int> pourJugs(vector<int> curr, vector<int> &sizes, int from, int to, int
 	return curr;
 }
 
+//Get all adjacent ways from current jug measurements
 vector< vector<int> > getAdjacents(vector<int> curr, vector<int> &sizes)
 {
 	vector< vector<int> > ways;
@@ -91,7 +94,7 @@ vector< vector<int> > getAdjacents(vector<int> curr, vector<int> &sizes)
 }
 
 //vector< vector<int> >
-void BFS(
+void BFS_helper(
 		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
 		vector< vector<bool> > &isVisited, queue< vector<int> > &searches)
 {
@@ -138,12 +141,84 @@ void BFS(
 		
 		for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
 		{
-			searches.push(*it);
+			if (!(isVisited[(*it)[0]][(*it)[1]]))
+			{
+				searches.push(*it);
+			}
+			searches.pop();
 			//BFS((*it), jarSizes, target, isVisited, searches);
 		}
 	}
 }
+/*
+vector< vector<int> > BFS(
+		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
+		vector< vector<bool> > &isVisited, queue< vector<int> > &searches)
+	{
+		
+	}
+*/
+//Print path
+void displayPath(vector< vector<int> > &way)
+{
+	for (vector< vector<int> >::iterator it = way.begin(); it != way.end(); ++it)
+	{
+		if (it == way.begin())
+		{
+			cout << "Initial state. (";
+			for (vector<int>::iterator vertex_it = (*it).begin(); vertex_it != (*it).end(); ++vertex_it)
+			{
+				if (vertex_it == (*it).begin())
+				{
+					cout << *vertex_it;
+				}
+				else
+				{
+					cout << ", " << *vertex_it;
+				}
+			}
+			cout << ")" << endl;
+		}
+		else
+		{
+			switch ((*it)[3])
+			{
+				case (1):
+					cout << "Pour " << (*it)[4] << " gallons from C to A. (";
+					break;
+				case (2):
+					cout << "Pour " << (*it)[4] << " gallons from B to A. (";
+					break;
+				case (3):
+					cout << "Pour " << (*it)[4] << " gallons from C to B. (";
+					break;
+				case (4):
+					cout << "Pour " << (*it)[4] << " gallons from A to B. (";
+					break;
+				case (5):
+					cout << "Pour " << (*it)[4] << " gallons from B to C. (";
+					break;
+				case (6):
+					cout << "Pour " << (*it)[4] << " gallons from A to C. (";
+					break;
+			}
+			for (int i = 0; i < 3; ++i)
+			{
+				if (i == 0)
+				{
+					cout << (*it)[i];
+				}
+				else
+				{
+					cout << ", " << (*it)[i];
+				}
+			}
+			cout << ")" << endl;
+		}
+	}
+}
 
+//Check case on user input into command line
 bool parseArg(vector<int> &jarSizes, vector<int> &target)
 {
 	int counter = 0;
@@ -174,8 +249,6 @@ bool parseArg(vector<int> &jarSizes, vector<int> &target)
 	return true;
 }
 
-
-
 int main(int argc, char * const argv[]) 
 {
 	if (argc != 7)
@@ -185,10 +258,9 @@ int main(int argc, char * const argv[])
 	}
 	//Create two vectors initial and target in main function
 	istringstream iss;
-	vector<int> curr(4);
+	vector<int> curr(5);
 	vector<int> jarSizes(3);
 	vector<int> target(3);
-	queue< vector<int> > BFS_queue;
 	int val;
 	string str;
 	
@@ -262,13 +334,38 @@ int main(int argc, char * const argv[])
 			cout << endl;
 		}
 		*/
+		/*
+		Display Test
 		curr[2] = jarSizes[2];
-		BFS_queue.push(curr);
-		//vector< vector<int> > path = 
-		BFS(curr, jarSizes, target, visited, BFS_queue);
-		cout << endl << endl;
+		queue< vector<int> > searches;
+		searches.push(curr);
+		BFS_helper(curr, jarSizes, target, visited, searches);
+		vector< vector<int> > paths;
+		vector<int> way;
+		way.push_back(0);
+		way.push_back(0);
+		way.push_back(8);
+		paths.push_back(way);
+		way.clear();
+		way.push_back(1);
+		way.push_back(0);
+		way.push_back(2);
+		way.push_back(1);
+		way.push_back(1);
+		paths.push_back(way);
+		cout << endl;
+		displayPath(paths);
+		*/
+		
+		/*
+		vector< vector<int> > path = BFS(curr, jarSizes, target, visited, searches);
+		if (path.size <= 0)
+		{
+			cout << "No solution." << endl;
+			return 1;
+		}
+		displayPath(path);
+		*/
 	}
-	
-	//delete [] visited;
 	return 0;
 }
