@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Name        : waterjug.cpp
+ * Name        : waterjugpuzzle.cpp
  * Author      : Luis Meneses
  * Date        : October 8, 2015
  * Description : Lists the number of ways to climb n stairs.
@@ -18,6 +18,8 @@
 using namespace std;
 
 bool Compare(vector<int> &curr, vector<int> &target) {
+	//compares a location by only looking at the first 3 numbers
+	//how the water is distributed
 	unsigned int i = 0;
 	for(i = 0; i < 3 && curr[i] == target[i]; i++) {
 		;
@@ -28,26 +30,36 @@ bool Compare(vector<int> &curr, vector<int> &target) {
 	return false;
 }
 
+vector<int> pourJugs(vector<int> curr, vector<int> size,
+		int from, int to, int order) {
+	//returns the next status according to the order given
+	if(curr[from] > (size[to] - curr[to])) {
+		curr[4] = (size[to] - curr[to]);
+		curr[from] = curr[from] - (size[to] - curr[to]);
+		curr[to] = size[to];
+		curr[3] = order;
+	} else {
+		curr[4] = curr[from];
+		curr[to] = curr[to] + curr[from];
+		curr[from] = 0;
+		curr[3] = order;
+	}
+	return curr;
+}
+
 bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 		vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
-	//this should really be a helper function, where the main function calls this to queue up more things and then looks at the next one
-	//available adds a specific case to the queue and is set to false so we can check if we can use that possibility or if we have
+	//enques all unvisited adjacent possibilities
+	//returns true if the target is found, enques then returns
 	vector<int> next;
+	vector<int> size;
+	size.push_back(capa);
+	size.push_back(capb);
+	size.push_back(capc);
 	bool available = false;
 	if(curr[2] > 0 && curr[0] < capa) {
-		if(curr[2] > (capa - curr[0])) {
-			next.push_back(capa);
-			next.push_back(curr[1]);
-			next.push_back(curr[2]-(capa-curr[0]));
-			next.push_back(1);
-			next.push_back(capa - curr[0]);
-		} else {
-			next.push_back(curr[0] + curr[2]);
-			next.push_back(curr[1]);
-			next.push_back(0);
-			next.push_back(1);
-			next.push_back(curr[2]);
-		}
+		next = pourJugs(curr, size, 2, 0, 1);
+		//exiting after finding
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -61,22 +73,9 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 			available = false;
 		}
 		next.clear();
-		//if at any time next == target it should break all of these if statements
 	}
 	if(curr[1] > 0 && curr[0] < capa) {
-		if(curr[1] > (capa - curr[0])) {
-			next.push_back(capa);
-			next.push_back(curr[1]-(capa-curr[0]));
-			next.push_back(curr[2]);
-			next.push_back(2);
-			next.push_back(capa-curr[0]);
-		} else {
-			next.push_back(curr[0] + curr[1]);
-			next.push_back(0);
-			next.push_back(curr[2]);
-			next.push_back(2);
-			next.push_back(curr[1]);
-		}
+		next = pourJugs(curr, size, 1, 0, 2);
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -93,19 +92,7 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 	}
 
 	if(curr[2] > 0 && curr[1] < capb) {
-		if(curr[2] > (capb - curr[1])) {
-			next.push_back(curr[0]);
-			next.push_back(capb);
-			next.push_back(curr[2] - (capb-curr[1]));
-			next.push_back(3);
-			next.push_back(capb-curr[1]);
-		} else {
-			next.push_back(curr[0]);
-			next.push_back(curr[1] + curr[2]);
-			next.push_back(0);
-			next.push_back(3);
-			next.push_back(curr[2]);
-		}
+		next = pourJugs(curr, size, 2, 1, 3);
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -122,19 +109,7 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 	}
 
 	if(curr[0] > 0 && curr[1] < capb) {
-		if(curr[0] > (capb - curr[1])) {
-			next.push_back(curr[0] - (capb - curr[1]));
-			next.push_back(capb);
-			next.push_back(curr[2]);
-			next.push_back(4);
-			next.push_back(capb - curr[1]);
-		} else {
-			next.push_back(0);
-			next.push_back(curr[0] + curr[1]);
-			next.push_back(curr[2]);
-			next.push_back(4);
-			next.push_back(curr[0]);
-		}
+		next = pourJugs(curr, size, 0, 1, 4);
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -151,19 +126,7 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 	}
 
 	if(curr[1] > 0 && curr[2] < capc) {
-		if(curr[1] > (capc - curr[2])) {
-			next.push_back(curr[0]);
-			next.push_back(curr[1] - (capc - curr[2]));
-			next.push_back(capc);
-			next.push_back(5);
-			next.push_back(capc - curr[2]);
-		} else {
-			next.push_back(curr[0]);
-			next.push_back(0);
-			next.push_back(curr[1] + curr[2]);
-			next.push_back(5);
-			next.push_back(curr[1]);
-		}
+		next = pourJugs(curr, size, 1, 2, 5);
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -180,19 +143,7 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 	}
 
 	if(curr[0] > 0 && curr[2] < capc) {
-		if(curr[0] > (capc - curr[2])) {
-			next.push_back(curr[0] - (capc - curr[2]));
-			next.push_back(curr[1]);
-			next.push_back(capc);
-			next.push_back(6);
-			next.push_back(capc-curr[2]);
-		} else {
-			next.push_back(0);
-			next.push_back(curr[1]);
-			next.push_back(curr[2] + curr[0]);
-			next.push_back(6);
-			next.push_back(curr[0]);
-		}
+		next = pourJugs(curr, size, 0, 2, 6);
 		if(Compare(next, target)) {
 			search.push(next);
 			return true;
@@ -214,6 +165,7 @@ bool BFS_helper(vector<int> &curr, int capa, int capb, int capc,
 
 vector< vector<int> > BFS(vector<int> &curr,int capa, int capb, int capc,
 		vector<int> &target, vector< vector<int> > &visited, queue< vector<int> > &search) {
+	//returns a 2D vector the entire BFS or up to the target
 	vector< vector<int> > bfs;
 	search.push(curr);
 	if(Compare(curr, target)) {
@@ -240,6 +192,7 @@ vector< vector<int> > BFS(vector<int> &curr,int capa, int capb, int capc,
 }
 
 void before(vector< vector<int> > &bfs, vector<int> &target) {
+	//pops the end of the vector until the target is at the end
 	if(Compare(bfs[bfs.size()-1], target)) {
 		return;
 	}
@@ -249,6 +202,9 @@ void before(vector< vector<int> > &bfs, vector<int> &target) {
 }
 
 vector< vector<int> > find_way(vector< vector<int> > &bfs, vector<int> &target, vector<int> &start) {
+	//returns the path from start to target of a BFS by tracing
+	//backwards, using the path taken with water poured to find
+	//what it should have come from
 	vector<int> curr;
 	vector<int> next;
 	vector< vector<int> > reverse;
@@ -408,6 +364,8 @@ int main(int argc, char * const argv[]) {
 	start.push_back(0);
 	start.push_back(0);
 	start.push_back(capc);
+	start.push_back(0);
+	start.push_back(0);
 	vector<int> target;
 	target.push_back(a);
 	target.push_back(b);
@@ -420,6 +378,7 @@ int main(int argc, char * const argv[]) {
 	for(int j = 0; j <= capc; j++) {
 		visited.push_back(fill);
 	}
+	//the beggining is already visited
 	visited[0][0] = 1;
 	queue< vector<int> > search;
 	vector< vector<int> > bfs;
