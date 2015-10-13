@@ -47,18 +47,12 @@ vector<int> pourJugs(vector<int> curr, vector<int> &sizes, int from, int to, int
 	}
 	else
 	{
-		curr[from] = curr[from] - sizes[to] - curr[to];
+		curr[from] = curr[from] - (sizes[to] - curr[to]);
 		curr[4] = sizes[to] - curr[to];
 		curr[to] = sizes[to];
 	}
 	curr[3] = order;
-	/*
-	for (vector<int>::iterator it = curr.begin(); it != curr.end(); ++it)
-	{
-		cout << *it << " ";
-	}
-	cout << endl;
-	*/
+	
 	return curr;
 }
 
@@ -92,126 +86,114 @@ vector< vector<int> > getAdjacents(vector<int> curr, vector<int> &sizes)
 	}
 	return ways;
 }
-/*
-//vector< vector<int> >
-void BFS_helper(
-		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
-		vector< vector<bool> > &isVisited, queue< vector<int> > &searches)
-{
-	//Current vertex
-	for (vector<int>::iterator it = curr.begin(); it != curr.end(); ++it)
-	{
-		cout << *it << " ";
-	}
-	cout << endl;
-	
-	//If reach target
-	if (equal(curr.begin(), curr.begin() + 3, target.begin()))
-	{
-		cout << "Done" << endl;
-	}
-	if (!(isVisited[curr[0]][curr[1]]))
-	{
-		searches.push(curr);
-		isVisited[curr[0]][curr[1]] = true;
-		// Show all visited list
-		cout << "Visited" << endl;
-		for (vector< vector<bool> >::const_iterator it = isVisited.begin(); it != isVisited.end(); ++it)
-		{
-			for (vector<bool>::const_iterator its = (*it).begin(); its != (*it).end(); ++its)
-			{
-				cout << (*its) << " ";
-			}
-			cout << endl;
-		}
-		
-		vector< vector<int> > paths = getAdjacents(curr, jarSizes);
-		
-		//All possible adjacent paths of cuurent vertex
-		cout << "Branches" << endl;
-		for (vector< vector<int> >::const_iterator it = paths.begin(); it != paths.end(); ++it)
-		{
-			for (vector<int>::const_iterator its = (*it).begin(); its != (*it).end(); ++its)
-			{
-				cout << (*its) << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-		
-		for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
-		{
-			if (!(isVisited[(*it)[0]][(*it)[1]]))
-			{
-				searches.push(*it);
-			}
-			searches.pop();
-			//BFS((*it), jarSizes, target, isVisited, searches);
-		}
-	}
-}
-*/
 
 void BFS_helper(
 		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
-		vector< vector<bool> > &isVisited, queue< vector<int> > &searches,  
-		vector< vector<int> > &result)
+		vector< vector<bool> > &visitedJars, queue< vector<int> > &searches)
 {
-	//If reach target
-	if (!(equal(curr.begin(), curr.begin() + 3, target.begin())))
-	{
-		if (!(isVisited[curr[0]][curr[1]]))
-		{
-			searches.push(curr);
-			isVisited[curr[0]][curr[1]] = true;
-			
-			vector< vector<int> > paths = getAdjacents(curr, jarSizes);
+	visitedJars[curr[0]][curr[1]] = true;
+	vector< vector<int> > paths = getAdjacents(curr, jarSizes);
 
-			for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
-			{
-				if (!(isVisited[(*it)[0]][(*it)[1]]))
-				{
-					searches.push(*it);
-					BFS_helper((*it), jarSizes, target, isVisited, searches, result);
-					searches.pop();
-				}
-			}
-		}
-	}
-	else
+	for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
 	{
-		while (searches.size() > 0)
+		if (!(visitedJars[(*it)[0]][(*it)[1]]))
 		{
-			result.push_back(searches.front());
-			searches.pop();
+			searches.push(*it);
 		}
 	}
+	//BFS_helper((*it), jarSizes, target, isVisited, searches, result);
+	//searches.pop();
 }
 
 vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &target)
 {
 	vector< vector<int> > result;
-	queue< vector<int> > searches;
-	vector< vector<bool> > visitedJars(jarSizes[0] + 1, vector<bool>(jarSizes[1] + 1));;
-	if (!(visitedJars[curr[0]][curr[1]]))
+	/*
+	if (!(equal(curr.begin(), curr.begin() + 3, target.begin())))
 	{
-		searches.push(curr);
+		BFS_helper(curr, jarSizes, target, visitedJars, searches, result);
+	}
+	*/
+	if (equal(curr.begin(), curr.begin() + 3, target.begin()))	
+	{
 		result.push_back(curr);
-		visitedJars[curr[0]][curr[1]] = true;
-		vector< vector<int> > paths = getAdjacents(curr, jarSizes);
+	}
+	else
+	{
+		queue< vector<int> > searches;
+		vector< vector<bool> > visitedJars(jarSizes[0] + 1, vector<bool>(jarSizes[1] + 1));
 		
-		for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
+		searches.push(curr);
+		vector<int> first_search = searches.front();
+		while ((!(searches.empty())) && (!(equal(first_search.begin(), first_search.begin() + 3, target.begin()))))
 		{
-			if (!(visitedJars[(*it)[0]][(*it)[1]]))
+			BFS_helper(first_search, jarSizes, target, visitedJars, searches);
+			result.push_back(first_search);
+			searches.pop();
+			first_search = searches.front();
+		}
+		result.push_back(first_search);
+		if (!(equal(first_search.begin(), first_search.begin() + 3, target.begin())))
+		{
+			result.clear();
+		}
+	}
+	
+	for (vector< vector<int> >::iterator its = result.begin(); its != result.end(); ++its)
+	{
+		for (vector<int>::iterator it = (*its).begin(); it != (*its).end(); ++it)
+		{
+			cout << *it << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	
+	return result;
+}
+
+//TODO: Find solution to find the correct path in the vec of vec<int>
+// Getting bad allocation
+vector< vector<int> > findShortestPath(vector< vector<int> > &paths)
+{
+	vector< vector<int> > rightPath;
+	for (vector< vector<int> >::iterator it = paths.end(); it != paths.begin();)
+	{
+		rightPath.push_back((*it));
+	
+		switch ((*it)[3])
+		{
+			case (1):
+				(*it)[2] += (*it)[4];
+				(*it)[0] -= (*it)[4];
+			case (2):
+				(*it)[1] += (*it)[4];
+				(*it)[0] -= (*it)[4];
+			case (3):
+				(*it)[2] +=  (*it)[4];
+				(*it)[1] -= (*it)[4];
+			case (4):
+				(*it)[0] += (*it)[4];
+				(*it)[1] -= (*it)[4];
+			case (5):
+				(*it)[1] += (*it)[4];
+				(*it)[2] -= (*it)[4];
+			case (6):
+				(*it)[0] += (*it)[4];
+				(*it)[2] -= (*it)[4];
+		}
+		
+		for (vector< vector<int> >::iterator its = paths.begin(); its != paths.end(); ++its)
+		{
+			if (((*its)[0] == (*it)[0]) && ((*its)[1] == (*it)[1]))
 			{
-				searches.push(*it);
-				BFS_helper((*it), jarSizes, target, visitedJars, searches, result);
-				result.push_back(searches.front());
-				searches.pop();
+				(*it) = (*its);
+				break;
 			}
 		}
 	}
-	return result;
+	rightPath.push_back(paths[0]);
+	return rightPath;
 }
 
 //Print path
@@ -278,7 +260,7 @@ void displayPath(vector< vector<int> > &way)
 //Check case on user input into command line
 bool parseArg(vector<int> &jarSizes, vector<int> &target)
 {
-	int counter(0);
+	int counter = 0;
 	for (int i = 0; i < 3; ++i)
 	{
 		if (target[i] > jarSizes[i])
@@ -315,7 +297,6 @@ int main(int argc, char * const argv[])
 	}
 	//Create two vectors initial and target in main function
 	istringstream iss;
-	vector<int> curr(5);
 	vector<int> jarSizes(3);
 	vector<int> target(3);
 	int val;
@@ -378,19 +359,19 @@ int main(int argc, char * const argv[])
 		iss.clear();
 	}
 	//In parseArg, have two parameters that take vector<int>
-	if (!(parseArg(jarSizes, target)))
+	if (parseArg(jarSizes, target))
 	{
-		return 1;
-	}
-	curr[2] = jarSizes[2];
-	vector< vector<int> > paths = BFS(curr, jarSizes, target);
-	if (paths.size() <= 1)
-	{
-		cout << "No solution." << endl;
-	}
-	else
-	{
-		displayPath(paths);
+		vector<int> curr(5);
+		curr[2] = jarSizes[2];
+		vector< vector<int> > paths = BFS(curr, jarSizes, target);
+		if (paths.size() <= 0)
+		{
+			cout << "No solution." << endl;
+			return 0;
+		}
+		vector< vector<int> > path;
+		path = findShortestPath(paths);
+		displayPath(path);
 	}
 	/*
 	for (vector< vector<bool> >::const_iterator it = visited.begin(); it != visited.end(); ++it)
@@ -402,28 +383,6 @@ int main(int argc, char * const argv[])
 		cout << endl;
 	}
 	*/
-	/*
-	Display Test
-	curr[2] = jarSizes[2];
-	queue< vector<int> > searches;
-	searches.push(curr);
-	BFS_helper(curr, jarSizes, target, visited, searches);
-	vector< vector<int> > paths;
-	vector<int> way;
-	way.push_back(0);
-	way.push_back(0);
-	way.push_back(8);
-	paths.push_back(way);
-	way.clear();
-	way.push_back(1);
-	way.push_back(0);
-	way.push_back(2);
-	way.push_back(1);
-	way.push_back(1);
-	paths.push_back(way);
-	cout << endl;
-	displayPath(paths);
-	*/
 	
 	/*
 	vector< vector<int> > path = BFS(curr, jarSizes, target, visited, searches);
@@ -434,5 +393,6 @@ int main(int argc, char * const argv[])
 	}
 	displayPath(path);
 	*/
+	
 	return 0;
 }
