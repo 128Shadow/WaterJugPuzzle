@@ -87,17 +87,19 @@ vector< vector<int> > getAdjacents(vector<int> curr, vector<int> &sizes)
 	return ways;
 }
 
+// Use visit check if push onto queue or not
 void BFS_helper(
 		vector<int> curr, vector<int> &jarSizes, vector<int> &target, 
 		vector< vector<bool> > &visitedJars, queue< vector<int> > &searches)
 {
-	visitedJars[curr[0]][curr[1]] = true;
 	vector< vector<int> > paths = getAdjacents(curr, jarSizes);
 
 	for (vector< vector<int> >::iterator it = paths.begin(); it != paths.end(); ++it)
 	{
 		if (!(visitedJars[(*it)[0]][(*it)[1]]))
 		{
+			visitedJars[(*it)[0]][(*it)[1]] = true;
+			//cout << visitedJars[(*it)[0]][(*it)[1]] << " " << (*it)[0] << " " << (*it)[1] << endl;
 			searches.push(*it);
 		}
 	}
@@ -105,6 +107,7 @@ void BFS_helper(
 	//searches.pop();
 }
 
+// TODO: Find way to break when equal or no solution
 vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &target)
 {
 	vector< vector<int> > result;
@@ -124,21 +127,33 @@ vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &
 		vector< vector<bool> > visitedJars(jarSizes[0] + 1, vector<bool>(jarSizes[1] + 1));
 		
 		searches.push(curr);
-		vector<int> first_search = searches.front();
-		while ((!(searches.empty())) && (!(equal(first_search.begin(), first_search.begin() + 3, target.begin()))))
+		visitedJars[0][0] = true;
+		//vector<int> first_search = searches.front();
+		while ((!(searches.empty())) && (!(equal(searches.front().begin(), searches.front().begin() + 3, target.begin()))))
 		{
-			BFS_helper(first_search, jarSizes, target, visitedJars, searches);
-			result.push_back(first_search);
+			/*
+			cout << "Current queue" << endl;
+			for (vector<int>::iterator it = searches.front().begin(); it != searches.front().end(); ++it)
+			{
+				cout << *it << " ";
+			}
+			cout << endl;
+			*/
+			BFS_helper(searches.front(), jarSizes, target, visitedJars, searches);
+			result.push_back(searches.front());
 			searches.pop();
-			first_search = searches.front();
+			//first_search = searches.front();
 		}
-		result.push_back(first_search);
-		if (!(equal(first_search.begin(), first_search.begin() + 3, target.begin())))
+		if (searches.size() > 0)
+		{
+			result.push_back(searches.front());
+		}
+		else
 		{
 			result.clear();
 		}
 	}
-	
+	/*
 	for (vector< vector<int> >::iterator its = result.begin(); its != result.end(); ++its)
 	{
 		for (vector<int>::iterator it = (*its).begin(); it != (*its).end(); ++it)
@@ -148,6 +163,7 @@ vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &
 		cout << endl;
 	}
 	cout << endl;
+	*/
 	
 	return result;
 }
@@ -157,10 +173,65 @@ vector< vector<int> > BFS(vector<int> curr, vector<int> &jarSizes, vector<int> &
 vector< vector<int> > findShortestPath(vector< vector<int> > &paths)
 {
 	vector< vector<int> > rightPath;
+	vector<int> it;
+	
+	while (paths.size() > 1)
+	{
+		rightPath.push_back(paths.back());
+		it = paths.back();
+		/*
+		for (vector<int>::iterator its = it.begin(); its != it.end(); ++its)
+		{
+			cout << *its << " ";
+		}
+		cout << endl;
+		*/
+		paths.pop_back();
+		switch (it[3])
+		{
+			case (1):
+				it[2] += it[4];
+				it[0] -= it[4];
+				break;
+			case (2):
+				it[1] += it[4];
+				it[0] -= it[4];
+				break;
+			case (3):
+				it[2] += it[4];
+				it[1] -= it[4];
+				break;
+			case (4):
+				it[0] += it[4];
+				it[1] -= it[4];
+				break;
+			case (5):
+				it[1] += it[4];
+				it[2] -= it[4];
+				break;
+			case (6):
+				it[0] += it[4];
+				it[2] -= it[4];
+				break;
+		}
+		/*
+		for (vector<int>::iterator its = it.begin(); its != it.end(); ++its)
+		{
+			cout << *its << " ";
+		}
+		cout << endl << endl;
+		*/
+		
+		while (!(equal(paths.back().begin(), paths.back().begin() + 2, it.begin())))
+		{
+			paths.pop_back();
+		}
+	}
+	/*
 	for (vector< vector<int> >::iterator it = paths.end(); it != paths.begin();)
 	{
 		rightPath.push_back((*it));
-	
+		
 		switch ((*it)[3])
 		{
 			case (1):
@@ -185,24 +256,34 @@ vector< vector<int> > findShortestPath(vector< vector<int> > &paths)
 		
 		for (vector< vector<int> >::iterator its = paths.begin(); its != paths.end(); ++its)
 		{
-			if (((*its)[0] == (*it)[0]) && ((*its)[1] == (*it)[1]))
+			if ((((*its)[0]) == ((*it)[0])) && (((*its)[1]) == ((*it)[1])))
 			{
 				(*it) = (*its);
 				break;
 			}
 		}
+		*/
+		rightPath.push_back(paths.front());
+	/*
+	for (vector< vector<int> >::iterator its = rightPath.begin(); its != rightPath.end(); ++its)
+	{
+		for (vector<int>::iterator it = (*its).begin(); it != (*its).end(); ++it)
+		{
+			cout << *it << " ";
+		}
+		cout << endl;
 	}
-	rightPath.push_back(paths[0]);
+	*/
 	return rightPath;
 }
 
 //Print path
 void displayPath(vector< vector<int> > &way)
 {
-	for (vector< vector<int> >::iterator it = way.begin(); it != way.end(); ++it)
+	for (vector< vector<int> >::reverse_iterator it = way.rbegin(); it != way.rend(); ++it)
 	{
-		if (it == way.begin())
-		{
+		if (it == way.rbegin())
+		{			
 			cout << "Initial state. (";
 			for (int i = 0; i < 3; ++i)
 			{
@@ -219,7 +300,14 @@ void displayPath(vector< vector<int> > &way)
 		}
 		else
 		{
-			cout << "Pour " << (*it)[4] << " gallons from ";
+			if ((*it)[4] <= 1)
+			{
+				cout << "Pour " << (*it)[4] << " gallon from ";
+			}
+			else
+			{
+				cout << "Pour " << (*it)[4] << " gallons from ";
+			}
 			switch ((*it)[3])
 			{
 				case (1):
@@ -369,8 +457,7 @@ int main(int argc, char * const argv[])
 			cout << "No solution." << endl;
 			return 0;
 		}
-		vector< vector<int> > path;
-		path = findShortestPath(paths);
+		vector< vector<int> > path = findShortestPath(paths);
 		displayPath(path);
 	}
 	/*
